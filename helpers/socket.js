@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { deleteLobby } from "../controllers/lobby.js";
+// import { deleteLobby } from "../controllers/lobby.js";
 
 export class SocketClass {
   constructor(server, corsOptions) {
@@ -40,7 +40,6 @@ export class SocketClass {
 
       socket.on("disconnect", () => {
         console.log("Client disconnected:", socket.id);
-        deleteLobby();
       });
     });
   }

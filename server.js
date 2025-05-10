@@ -2,9 +2,8 @@ import express, { urlencoded } from "express";
 
 import cors from "cors";
 import { createServer } from "http";
-
+import { getRoutes } from "./routes.js";
 import { connectDB } from "./helpers/database.js";
-import { getRoutes } from "./helpers/routes.js";
 import { SocketClass } from "./helpers/socket.js";
 
 const URL = {
