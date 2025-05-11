@@ -16,7 +16,7 @@ var app = express();
 const corsOptions = {
   origin: "https://space-war-front.vercel.app", // Domínio permitido
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Métodos permitidos
-  credentials: false, // Permite incluir cookies nas solicitações (se necessário)
+  credentials: true, // Permite incluir cookies nas solicitações (se necessário)
   optionsSuccessStatus: 204, // Responde com um status 204 se a pré-verificação for bem-sucedida
 };
 
