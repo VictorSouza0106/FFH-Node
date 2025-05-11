@@ -36,5 +36,5 @@ socketInstance.startSocket();
 connectDB();
 getRoutes(app);
 
-export const io = socketInstance.getIO();
+export const SOCKET_INSTANCE = socketInstance;
 export default socketInstance;

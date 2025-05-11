@@ -1,6 +1,5 @@
-import { io } from "../../server.js";
+import { SOCKET_INSTANCE } from "../../server.js";
 import { Lobby } from "../models/lobby.js";
-import socketInstance from "../../server.js";
 
 // helper functions
 
@@ -29,27 +28,32 @@ async function createRandomRoomCode() {
 // View Functions
 export async function createLobby(req, res) {
   let data = req.body;
+  let roomCode = await createRandomRoomCode();
 
   const userData = {
     username: data["username"],
     LU_ID: null,
     connect: true,
     isMaster: false,
-    socked_id: socketInstance.getSocketId(),
+    socked_id: SOCKET_INSTANCE.getSocket().id,
   };
 
   try {
     const data = {
-      _socket: socketInstance.getSocketId(),
-      roomCode: await createRandomRoomCode(),
+      _socket: SOCKET_INSTANCE.getSocket().id,
+      roomCode: roomCode,
       chatEnable: false,
       mapMoveEnable: false,
       users: [userData],
     };
     const lobby = new Lobby(data);
     await lobby.save();
+
+    SOCKET_INSTANCE.getSocket().join(roomCode);
+    socketMessageListener();
     res.status(200).send(lobby);
   } catch (err) {
+    console.log(err);
     res.status(500).send("Erro interno do servidor:");
   }
 }
@@ -74,7 +78,7 @@ export async function addUserOnLobby(req, res) {
       LU_ID: null,
       connect: true,
       isMaster: false,
-      socked_id: socketInstance.getSocketId(),
+      socked_id: SOCKET_INSTANCE.getSocket().id,
     };
     const roomCode = req.params.roomCode;
 
@@ -97,12 +101,9 @@ export async function addUserOnLobby(req, res) {
     lobby.users.push(userData);
     await Lobby.updateOne({ roomCode: roomCode }, lobby);
 
-    let socketData = {
-      type: "lobbyUser",
-      data: lobby,
-    };
-
-    io.emit(roomCode, socketData);
+    SOCKET_INSTANCE.getSocket().join(roomCode);
+    socketMessageListener();
+    emitLobbyUserUpdate(roomCode, lobby);
     res.status(200).send(lobby);
   } catch (error) {
     res.status(500).send("Erro interno do servidor:");
@@ -119,7 +120,7 @@ export async function reconnectUserOnLobby(req, res) {
       LU_ID: null,
       connect: true,
       isMaster: false,
-      socked_id: socketInstance.getSocketId(),
+      socked_id: SOCKET_INSTANCE.getSocket().id,
     };
     const roomCode = req.params.roomCode;
 
@@ -144,12 +145,7 @@ export async function reconnectUserOnLobby(req, res) {
     await Lobby.updateOne({ roomCode: roomCode }, lobby);
     console.log(lobby.users);
 
-    let socketData = {
-      type: "lobbyUser",
-      data: lobby,
-    };
-
-    io.emit(roomCode, socketData);
+    emitLobbyUserUpdate(roomCode, lobby);
     res.status(200).send(lobby);
   } catch (error) {
     res.status(500).send("Erro interno do servidor:");
@@ -179,11 +175,23 @@ export async function removeUserFromLobby(req, res) {
   lobby.users.splice(deletedIndex, 1);
   await Lobby.updateOne({ roomCode: roomCode }, lobby);
 
-  let socketData = {
-    type: "lobbyUser",
-    data: lobby,
-  };
-
-  io.emit(roomCode, socketData);
+  emitLobbyUserUpdate(roomCode, lobby);
   res.status(200).send(lobby);
+}
+
+function emitLobbyUserUpdate(roomCode, lobby) {
+  lobby.gameTeams.forEach((t) => console.log(t));
+
+  SOCKET_INSTANCE.getIO().to(roomCode).emit("updateLobby", lobby);
+}
+
+function socketMessageListener() {
+  // message
+  // roomCode
+  // data
+
+  SOCKET_INSTANCE.getSocket().on("client_message", (message) => {
+    console.log(message);
+    emitLobbyUserUpdate(message.roomCode, message.data);
+  });
 }

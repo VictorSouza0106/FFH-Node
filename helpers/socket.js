@@ -5,7 +5,7 @@ export class SocketClass {
   constructor(server, corsOptions) {
     this.serverInstance = server;
     this.corsOptions = corsOptions;
-    this.socketId = null;
+    this.socket = null;
   }
 
   getServer() {
@@ -16,8 +16,8 @@ export class SocketClass {
     return this.io;
   }
 
-  getSocketId() {
-    return this.socketId;
+  getSocket() {
+    return this.socket;
   }
 
   staticsetCorsOptions(corsOptions) {
@@ -36,7 +36,7 @@ export class SocketClass {
     this.io.on("connection", (socket) => {
       console.log("Connect Socket.io ", socket.id);
 
-      this.socketId = socket.id;
+      this.socket = socket;
 
       socket.on("disconnect", () => {
         console.log("Client disconnected:", socket.id);
