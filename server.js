@@ -14,7 +14,7 @@ const URL = {
 var app = express();
 
 const corsOptions = {
-  origin: "http://localhost:4200", // Domínio permitido
+  origin: "*", // Domínio permitido
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Métodos permitidos
   credentials: true, // Permite incluir cookies nas solicitações (se necessário)
   optionsSuccessStatus: 204, // Responde com um status 204 se a pré-verificação for bem-sucedida
