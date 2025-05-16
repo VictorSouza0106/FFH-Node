@@ -49,7 +49,15 @@ export async function createLobby(req, res) {
     const lobby = new Lobby(data);
     await lobby.save();
 
+    console.log();
     SOCKET_INSTANCE.getSocket().join(roomCode);
+    SOCKET_INSTANCE.getIO()
+      .of("/")
+      .in(roomCode)
+      .allSockets()
+      .then((sockets) => {
+        console.log(`Sockets na sala ${roomCode}:`, Array.from(sockets));
+      });
     socketMessageListener();
     res.status(200).send(lobby);
   } catch (err) {
